@@ -1,0 +1,33 @@
+using { /Fortnite.com/Devices/Teleporter }
+using { /Fortnite.com/Devices/RemoteSignalReceiver }
+
+# Function to create and set up a teleporter device.
+CreateTeleporter<public>()<transacts> : teleporter_device =
+    var Teleporter : teleporter_device = teleporter_device{}
+    # Additional setup for the teleporter can be done here.
+    return Teleporter
+
+# Function to create and set up a remote signal receiver.
+CreateRemoteSignalReceiver<public>()<transacts> : remote_signal_receiver_device =
+    var RemoteReceiver : remote_signal_receiver_device = remote_signal_receiver_device{}
+    # Additional setup for the remote signal receiver can be done here.
+    return RemoteReceiver
+
+# Function to teleport a player 10 meters forward.
+TeleportPlayer<public>(Player : player, Teleporter : teleporter_device)<transacts><decides> : void =
+    var CurrentTransform : transform = Player.GetTransform()
+    var ForwardVector : vector3 = CurrentTransform.Forward() * 10.0 # 10 meters forward
+    var TargetPosition : vector3 = CurrentTransform.Translation + ForwardVector
+
+    Teleporter.SetDestination(TargetPosition)
+    Teleporter.Teleport(Player)
+
+# Main function to set up the teleportation system.
+Main<public>()<transacts><decides> : void =
+    var MyTeleporter : teleporter_device = CreateTeleporter()
+    var MyRemoteReceiver : remote_signal_receiver_device = CreateRemoteSignalReceiver()
+
+    # Set up an interaction handler for the remote signal receiver.
+    MyRemoteReceiver.InteractionEvent.Subscribe(lambda (Player : player) :
+        TeleportPlayer(Player, MyTeleporter)
+    )
